@@ -20,7 +20,9 @@ import {
   Smile,
   Award,
   Info,
-  Lock
+  Lock,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 
 interface SimpleEvaluationFormProps {
@@ -99,6 +101,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
 
   // Pestaña activa de muestra (Gusto 1, Gusto 2...)
   const [activeMobileSampleIndex, setActiveMobileSampleIndex] = useState(0);
+  const [isGustoDropdownOpen, setIsGustoDropdownOpen] = useState(false);
 
   // Modal / Canvas Firma
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -361,7 +364,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
   const currentSample = muestras[activeMobileSampleIndex] || muestras[0];
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 sm:py-8 min-h-screen overflow-y-visible flex flex-col pb-24 sm:pb-12">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 sm:py-8 min-h-screen overflow-y-visible flex-1 flex flex-col justify-between text-[#2c2724]">
       {/* Alerta de Éxito */}
       {saveSuccess && (
         <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-emerald-50 border-2 border-emerald-500 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce-short">
@@ -398,9 +401,9 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* ENCABEZADO OFICIAL DE LA PLANILLA (Código INF-D003) */}
-        <div className="bg-white rounded-2xl border-2 border-[#1e293b]/20 shadow-md overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-md overflow-hidden">
           {/* Fila superior: Título Principal | Metadatos */}
-          <div className="grid grid-cols-1 md:grid-cols-12 border-b-2 border-[#1e293b]/20 divide-y md:divide-y-0 md:divide-x-2 divide-[#1e293b]/20 bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-12 border-b border-[#ded4c3] divide-y md:divide-y-0 md:divide-x divide-[#ded4c3] bg-white">
             <div className="md:col-span-9 p-3 sm:p-4 flex flex-col items-center justify-center text-center bg-white">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-[10px] sm:text-xs uppercase font-bold tracking-widest text-slate-500">
@@ -432,7 +435,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
 
           {/* Fila de Datos: Fecha, Hora, Evaluador, Lote/Batea */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-white">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#ded4c3] bg-white">
             <div className="p-3 sm:p-3.5">
               <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
                 <Calendar className="w-4 h-4 text-[#5969E6]" />
@@ -495,7 +498,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
 
           {/* Instrucciones de la Planilla */}
-          <div className="p-3 sm:p-3.5 bg-amber-50/70 border-t border-amber-200/80 text-xs sm:text-sm text-slate-800 leading-relaxed italic flex items-start gap-2.5">
+          <div className="p-3 sm:p-3.5 bg-amber-50/70 border-t border-[#ded4c3] text-xs sm:text-sm text-slate-800 leading-relaxed italic flex items-start gap-2.5">
             <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <span>
               Escribí con tus palabras qué te pareció cada aspecto. Evaluá en orden: <strong>vista, olfato y boca</strong>. Del gusto más suave al más intenso. Entre gustos: <em>agua y galleta sin sal</em>.
@@ -503,11 +506,11 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
         </div>
 
-        {/* PANEL FUSIONADO ULTRA-COMPACTO: MUESTRAS A EVALUAR (DESTACADO Y VISIBLE) */}
-        <div className="bg-gradient-to-r from-amber-50/95 via-orange-50/95 to-amber-50/95 backdrop-blur-md rounded-2xl border-2 border-amber-300 shadow-md sticky top-14 z-30 sm:relative sm:top-0 p-2 sm:p-2.5 space-y-1.5 ring-1 ring-amber-400/30">
+        {/* PANEL FUSIONADO: MUESTRAS A EVALUAR Y CÓDIGO (EN EL MISMO CONTENEDOR Y EN LA MISMA LÍNEA) */}
+        <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-md sticky top-14 z-30 sm:relative sm:top-0 p-2.5 sm:p-3.5 space-y-2">
           {/* Título centrado, sutil y pequeño */}
           <div className="text-center">
-            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-900/80">
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600">
               Muestras a evaluar
             </span>
           </div>
@@ -522,13 +525,16 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => setActiveMobileSampleIndex(idx)}
+                  onClick={() => {
+                    setActiveMobileSampleIndex(idx);
+                    setIsGustoDropdownOpen(false);
+                  }}
                   className={`px-2.5 py-1 rounded-lg border text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
                     isSelected
                       ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                       : hasGustoAssigned
-                      ? 'bg-white text-amber-950 border-amber-400 font-bold shadow-xs'
-                      : 'bg-white/70 text-slate-500 border-amber-200 hover:bg-white'
+                      ? 'bg-white text-slate-800 border-[#ded4c3] font-bold shadow-xs'
+                      : 'bg-white/70 text-slate-500 border-[#ded4c3] hover:bg-white'
                   }`}
                 >
                   <span>{m.gusto ? m.gusto : `Gusto ${idx + 1}`}</span>
@@ -537,6 +543,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRemoveSample(idx);
+                        setIsGustoDropdownOpen(false);
                       }}
                       className={`p-0.5 rounded hover:bg-black/20 ${isSelected ? 'text-white' : 'text-slate-400 hover:text-rose-600'}`}
                       title="Eliminar muestra"
@@ -551,7 +558,10 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
             {muestras.length < 5 && (
               <button
                 type="button"
-                onClick={handleAddSample}
+                onClick={() => {
+                  handleAddSample();
+                  setIsGustoDropdownOpen(false);
+                }}
                 className="w-7 h-7 rounded-lg bg-[#5969E6] hover:bg-[#4856c4] text-white flex items-center justify-center shadow-sm transition-all shrink-0 active:scale-95"
                 title="Añadir hasta 5 muestras"
               >
@@ -560,46 +570,87 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
             )}
           </div>
 
-          {/* Selector de Gusto para la muestra seleccionada */}
-          <div className="flex items-center gap-2 pt-1 border-t border-amber-200/70">
-            <label className="text-[11px] font-black uppercase text-amber-950 shrink-0">
-              Gusto {activeMobileSampleIndex + 1}:
-            </label>
-            <select
-              value={currentSample.gusto}
-              onChange={(e) => handleUpdateSample(activeMobileSampleIndex, 'gusto', e.target.value)}
-              className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-[#5969E6] shadow-xs"
-            >
-              <option value="">Seleccionar Gusto...</option>
-              {EMPANADAS_GUSTOS.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+          {/* Fila en la misma línea: Desplegable de Gusto y Código de Muestra */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 pt-2 border-t border-[#ded4c3] items-center">
+            {/* Campo 1: Selector Estilizado de Gusto */}
+            <div className="flex items-center gap-2">
+              <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 shrink-0">
+                Gusto {activeMobileSampleIndex + 1}:
+              </label>
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => setIsGustoDropdownOpen((prev) => !prev)}
+                  className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-white border border-[#ded4c3] rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-[#5969E6] shadow-xs flex items-center justify-between transition-all hover:border-[#5969E6] h-[38px]"
+                >
+                  <span className={`truncate text-left flex-1 ${currentSample.gusto ? 'text-slate-900 font-bold' : 'text-slate-400 font-normal'}`}>
+                    {currentSample.gusto || 'Seleccionar Gusto...'}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#5969E6] transition-transform duration-200 shrink-0 ml-1.5 ${
+                      isGustoDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-        {/* CÓDIGO DE MUESTRA (Justo arriba de la evaluación) */}
-        <div className="bg-white rounded-xl border border-slate-200 p-2.5 shadow-sm flex items-center gap-2.5">
-          <label className="text-xs font-black uppercase tracking-wider text-slate-700 shrink-0">
-            Código de muestra:
-          </label>
-          <input
-            type="text"
-            placeholder={`Ej: M-${activeMobileSampleIndex + 1} (Horno 2 / Batea 3)`}
-            value={currentSample.codigoMuestra}
-            onChange={(e) => handleUpdateSample(activeMobileSampleIndex, 'codigoMuestra', e.target.value)}
-            className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 outline-none focus:bg-white focus:ring-2 focus:ring-[#5969E6] placeholder:text-slate-400 placeholder:font-normal"
-          />
+                {isGustoDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsGustoDropdownOpen(false)}
+                    />
+                    <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#fdfbf7] border border-[#ded4c3] rounded-xl shadow-2xl p-1.5 max-h-64 flex flex-col animate-fade-in min-w-[220px]">
+                      <div className="overflow-y-auto space-y-0.5 flex-1 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        {EMPANADAS_GUSTOS.map((g) => {
+                          const isSelected = currentSample.gusto === g;
+                          return (
+                            <button
+                              type="button"
+                              key={g}
+                              onClick={() => {
+                                handleUpdateSample(activeMobileSampleIndex, 'gusto', g);
+                                setIsGustoDropdownOpen(false);
+                              }}
+                              className={`w-full text-left px-2.5 py-2 rounded-lg text-xs sm:text-sm transition-colors flex items-center justify-between ${
+                                isSelected
+                                  ? 'bg-[#5969E6] text-white font-bold'
+                                  : 'text-[#2c2724] hover:bg-[#eeedfc] hover:text-[#5969E6]'
+                              }`}
+                            >
+                              <span className="truncate">{g}</span>
+                              {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Campo 2: Código de Muestra */}
+            <div className="flex items-center gap-2">
+              <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 shrink-0">
+                Código de muestra:
+              </label>
+              <input
+                type="text"
+                placeholder={`Ej: M-${activeMobileSampleIndex + 1} (Horno 2 / Batea 3)`}
+                value={currentSample.codigoMuestra}
+                onChange={(e) => handleUpdateSample(activeMobileSampleIndex, 'codigoMuestra', e.target.value)}
+                className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-white border border-[#ded4c3] rounded-lg px-2.5 py-1.5 outline-none focus:bg-white focus:ring-2 focus:ring-[#5969E6] focus:border-[#5969E6] placeholder:text-slate-400 placeholder:font-normal shadow-xs h-[38px]"
+              />
+            </div>
+          </div>
         </div>
 
         {/* CONTENEDOR DE EVALUACIÓN VERTICAL EN TARJETAS (100% MÓVIL Y FLUIDO) */}
         <div className="space-y-4">
 
           {/* SECCIÓN 1: VISTA */}
-          <div className="bg-white rounded-2xl border-2 border-blue-200 shadow-sm overflow-hidden">
-            <div className="bg-blue-50 px-3.5 py-2.5 border-b border-blue-100 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-sm overflow-hidden">
+            <div className="bg-blue-50/60 px-3.5 py-2.5 border-b border-[#ded4c3] flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-700 shrink-0" />
               <h2 className="text-xs sm:text-sm font-black uppercase text-blue-950 tracking-wider">
                 1. VISTA – empanada cortada al medio
@@ -695,8 +746,8 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
 
           {/* SECCIÓN 2: OLFATO */}
-          <div className="bg-white rounded-2xl border-2 border-indigo-200 shadow-sm overflow-hidden">
-            <div className="bg-indigo-50 px-3.5 py-2.5 border-b border-indigo-100 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-sm overflow-hidden">
+            <div className="bg-indigo-50/60 px-3.5 py-2.5 border-b border-[#ded4c3] flex items-center gap-2">
               <Wind className="w-4 h-4 text-indigo-700 shrink-0" />
               <h2 className="text-xs sm:text-sm font-black uppercase text-indigo-950 tracking-wider">
                 2. OLFATO – relleno recién cortado
@@ -723,8 +774,8 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
 
           {/* SECCIÓN 3: BOCA */}
-          <div className="bg-white rounded-2xl border-2 border-amber-200 shadow-sm overflow-hidden">
-            <div className="bg-amber-50 px-3.5 py-2.5 border-b border-amber-100 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-sm overflow-hidden">
+            <div className="bg-amber-50/60 px-3.5 py-2.5 border-b border-[#ded4c3] flex items-center gap-2">
               <Smile className="w-4 h-4 text-amber-700 shrink-0" />
               <h2 className="text-xs sm:text-sm font-black uppercase text-amber-950 tracking-wider">
                 3. BOCA – masa y relleno juntos
@@ -820,8 +871,8 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
 
           {/* SECCIÓN 4: EVALUACIÓN GLOBAL */}
-          <div className="bg-white rounded-2xl border-2 border-teal-200 shadow-sm overflow-hidden">
-            <div className="bg-teal-50 px-3.5 py-2.5 border-b border-teal-100 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-sm overflow-hidden">
+            <div className="bg-teal-50/60 px-3.5 py-2.5 border-b border-[#ded4c3] flex items-center gap-2">
               <Award className="w-4 h-4 text-teal-700 shrink-0" />
               <h2 className="text-xs sm:text-sm font-black uppercase text-teal-950 tracking-wider">
                 4. EVALUACIÓN GLOBAL
@@ -882,10 +933,10 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
         </div>
 
         {/* PIE DE FIRMA DEL EVALUADOR Y ENVÍO */}
-        <div className={`rounded-2xl border-2 transition-all p-3.5 sm:p-4 shadow-md ${
+        <div className={`rounded-2xl border transition-all p-3.5 sm:p-4 shadow-md ${
           pendingEvaluationInfo.isComplete
-            ? 'bg-white border-[#1e293b]/20'
-            : 'bg-slate-50 border-slate-300 relative overflow-hidden'
+            ? 'bg-white border-[#ded4c3]'
+            : 'bg-slate-50 border-[#ded4c3] relative overflow-hidden'
         }`}>
           {!pendingEvaluationInfo.isComplete && (
             <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-start gap-2.5">
@@ -939,7 +990,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
             </div>
 
             <div className="md:col-span-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-              <div className="w-full sm:w-80 h-28 border-2 border-dashed border-slate-300 rounded-xl bg-white relative overflow-hidden flex items-center justify-center">
+              <div className="w-full sm:w-80 h-28 border-2 border-dashed border-[#ded4c3] rounded-xl bg-white relative overflow-hidden flex items-center justify-center">
                 <canvas
                   ref={canvasRef}
                   width={340}
@@ -977,6 +1028,13 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           </div>
         </div>
       </form>
+
+      {/* Footer Sutil - Siempre al pie del viewport */}
+      <footer className="mt-auto pt-8 pb-3 border-t border-[#e2d9c8] text-center">
+        <p className="text-[10px] sm:text-[11px] text-[#7c746d] font-medium tracking-wide">
+          © Desarrollado por el Departamento de Sistemas de Mi Gusto | Todos los derechos reservados.
+        </p>
+      </footer>
     </div>
   );
 };

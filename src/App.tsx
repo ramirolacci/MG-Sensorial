@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import gsap from 'gsap';
 import { EvaluationForm } from './components/EvaluationForm';
 import { SimpleEvaluationForm } from './components/SimpleEvaluationForm';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -17,6 +18,8 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(() => getPendingEvaluations().length);
   const [isSyncingGlobal, setIsSyncingGlobal] = useState(false);
+  const [isSwitchingMode, setIsSwitchingMode] = useState(false);
+  const mainContainerRef = useRef<HTMLElement | null>(null);
 
   // Helper para verificar si la URL actual corresponde a /admin
   const checkIsAdminRoute = useCallback(() => {
@@ -112,6 +115,40 @@ export function App() {
     window.history.replaceState({}, '', import.meta.env.BASE_URL);
   };
 
+  const handleSwitchMode = (newMode: 'simple' | 'avanzada') => {
+    if (newMode === evaluationMode || isSwitchingMode) return;
+    setIsSwitchingMode(true);
+
+    if (mainContainerRef.current) {
+      gsap.to(mainContainerRef.current, {
+        opacity: 0,
+        y: 8,
+        duration: 0.16,
+        ease: 'power2.in',
+        onComplete: () => {
+          setEvaluationMode(newMode);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          gsap.fromTo(
+            mainContainerRef.current,
+            { opacity: 0, y: -8 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.26,
+              ease: 'power2.out',
+              onComplete: () => {
+                setIsSwitchingMode(false);
+              }
+            }
+          );
+        }
+      });
+    } else {
+      setEvaluationMode(newMode);
+      setIsSwitchingMode(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('mg_sensorial_admin_user');
     setCurrentUser(null);
@@ -171,31 +208,41 @@ export function App() {
               </button>
             )}
 
-            {/* SWITCH MODO: SIMPLE / AVANZADA */}
+            {/* SWITCH MODO: SIMPLE / AVANZADA CON PASTILLA DESLIZANTE */}
             {view === 'form' && (
-              <div className="bg-black/20 p-1 rounded-xl flex items-center gap-1 shadow-inner backdrop-blur-sm border border-white/20">
+              <div className="relative bg-black/25 p-1 rounded-xl flex items-center shadow-inner backdrop-blur-sm border border-white/20 select-none min-w-[170px] sm:min-w-[185px]">
+                {/* Pastilla indicadora animada que se desliza suavemente */}
+                <div
+                  className={`absolute top-1 bottom-1 rounded-lg transition-all duration-300 ease-out shadow-md pointer-events-none ${
+                    evaluationMode === 'simple'
+                      ? 'left-1 w-[calc(50%-4px)] bg-white'
+                      : 'left-[50%] w-[calc(50%-4px)] bg-[#5969E6]'
+                  }`}
+                />
+
                 <button
                   type="button"
-                  onClick={() => setEvaluationMode('simple')}
-                  className={`text-xs font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all ${
+                  onClick={() => handleSwitchMode('simple')}
+                  className={`relative z-10 text-xs font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center justify-center gap-1.5 transition-colors duration-300 flex-1 ${
                     evaluationMode === 'simple'
-                      ? 'bg-white text-[#FC7572] shadow-md scale-100'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? 'text-[#FC7572]'
+                      : 'text-white/80 hover:text-white'
                   }`}
                 >
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-3.5 h-3.5 shrink-0" />
                   <span>Simple</span>
                 </button>
+
                 <button
                   type="button"
-                  onClick={() => setEvaluationMode('avanzada')}
-                  className={`text-xs font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all ${
+                  onClick={() => handleSwitchMode('avanzada')}
+                  className={`relative z-10 text-xs font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center justify-center gap-1.5 transition-colors duration-300 flex-1 ${
                     evaluationMode === 'avanzada'
-                      ? 'bg-[#5969E6] text-white shadow-md scale-100'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? 'text-white'
+                      : 'text-white/80 hover:text-white'
                   }`}
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
                   <span>Avanzada</span>
                 </button>
               </div>
@@ -237,7 +284,7 @@ export function App() {
       )}
 
       {/* Vista activa con transición fluida GSAP */}
-      <main key={`${view}_${evaluationMode}`} className="flex-1 flex flex-col animate-fade-in">
+      <main ref={mainContainerRef} className="flex-1 flex flex-col">
         {view === 'form' ? (
           evaluationMode === 'simple' ? (
             <SimpleEvaluationForm onOpenAdmin={handleOpenAdmin} />
