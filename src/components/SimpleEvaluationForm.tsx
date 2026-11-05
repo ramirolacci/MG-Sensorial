@@ -133,6 +133,18 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
     ctx.strokeStyle = '#1e293b';
   }, []);
 
+  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -140,11 +152,9 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
     if (!ctx) return;
     setIsDrawing(true);
     setHasDrawn(true);
-    const rect = canvas.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const { x, y } = getCanvasCoords(e, canvas);
     ctx.beginPath();
-    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    ctx.moveTo(x, y);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -153,10 +163,8 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+    const { x, y } = getCanvasCoords(e, canvas);
+    ctx.lineTo(x, y);
     ctx.stroke();
   };
 
@@ -409,8 +417,8 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                 <span className="text-[10px] sm:text-xs uppercase font-bold tracking-widest text-slate-500">
                   Auditoría de Calidad en Planta
                 </span>
-                <span className="md:hidden text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                  INF-D003 v3
+                <span className="text-[10px] sm:text-xs font-mono font-black px-2.5 py-0.5 rounded-full bg-[#5969E6] text-white shadow-sm">
+                  INF-D003 V3
                 </span>
               </div>
               <h1 className="text-base sm:text-xl font-black uppercase tracking-tight text-slate-900 leading-tight">
@@ -434,11 +442,11 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
             </div>
           </div>
 
-          {/* Fila de Datos: Fecha, Hora, Evaluador, Lote/Batea */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#ded4c3] bg-white">
-            <div className="p-3 sm:p-3.5">
-              <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                <Calendar className="w-4 h-4 text-[#5969E6]" />
+          {/* Fila de Datos: Fecha y Hora en una misma línea en mobile, 4 columnas en desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-4 bg-white">
+            <div className="p-2.5 sm:p-3.5 border-r border-[#ded4c3]">
+              <label className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 mb-1 sm:mb-1.5">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5969E6]" />
                 FECHA:
               </label>
               <input
@@ -446,14 +454,14 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                 placeholder="dd/mm/aaaa"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
-                className="w-full text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
                 required
               />
             </div>
 
-            <div className="p-3 sm:p-3.5">
-              <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                <Clock className="w-4 h-4 text-[#5969E6]" />
+            <div className="p-2.5 sm:p-3.5 md:border-r border-[#ded4c3]">
+              <label className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 mb-1 sm:mb-1.5">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5969E6]" />
                 HORA (24 HS):
               </label>
               <input
@@ -461,37 +469,39 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                 placeholder="hh:mm (ej: 14:30)"
                 value={hora}
                 onChange={(e) => setHora(e.target.value)}
-                className="w-full text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
                 required
               />
             </div>
 
-            <div className="p-3 sm:p-3.5">
-              <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                <User className="w-4 h-4 text-[#5969E6]" />
-                EVALUADOR:
+            <div className="p-2.5 sm:p-3.5 col-span-2 md:col-span-1 border-t md:border-t-0 md:border-r border-[#ded4c3]">
+              <label className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 mb-1 sm:mb-1.5">
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5969E6]" />
+                <span>EVALUADOR:</span>
+                <span className="text-[#eb5757] font-extrabold text-sm ml-0.5" title="Campo obligatorio">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Tu nombre y apellido"
                 value={evaluador}
                 onChange={(e) => setEvaluador(e.target.value)}
-                className="w-full text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
                 required
               />
             </div>
 
-            <div className="p-3 sm:p-3.5">
-              <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                <Layers className="w-4 h-4 text-[#5969E6]" />
-                LOTE / BATEA:
+            <div className="p-2.5 sm:p-3.5 col-span-2 md:col-span-1 border-t md:border-t-0 border-[#ded4c3]">
+              <label className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 mb-1 sm:mb-1.5">
+                <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#5969E6]" />
+                <span>LOTE / BATEA:</span>
+                <span className="text-[#eb5757] font-extrabold text-sm ml-0.5" title="Campo obligatorio">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Ej: LOTE-402 B1"
                 value={loteBatea}
                 onChange={(e) => setLoteBatea(e.target.value)}
-                className="w-full text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                className="w-full text-xs sm:text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 focus:bg-white focus:border-[#5969E6] focus:ring-1 focus:ring-[#5969E6] outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
                 required
               />
             </div>
@@ -507,7 +517,7 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
         </div>
 
         {/* PANEL FUSIONADO: MUESTRAS A EVALUAR Y CÓDIGO (EN EL MISMO CONTENEDOR Y EN LA MISMA LÍNEA) */}
-        <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-md sticky top-14 z-30 sm:relative sm:top-0 p-2.5 sm:p-3.5 space-y-2">
+        <div className="bg-white rounded-2xl border border-[#ded4c3] shadow-md relative z-30 p-2.5 sm:p-3.5 space-y-2">
           {/* Título centrado, sutil y pequeño */}
           <div className="text-center">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600">
@@ -574,8 +584,9 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 pt-2 border-t border-[#ded4c3] items-center">
             {/* Campo 1: Selector Estilizado de Gusto */}
             <div className="flex items-center gap-2">
-              <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 shrink-0">
-                Gusto {activeMobileSampleIndex + 1}:
+              <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 shrink-0 flex items-center">
+                <span>Gusto {activeMobileSampleIndex + 1}:</span>
+                <span className="text-[#eb5757] font-extrabold text-sm ml-0.5" title="Campo obligatorio">*</span>
               </label>
               <div className="relative flex-1">
                 <button
@@ -1011,16 +1022,16 @@ export const SimpleEvaluationForm: React.FC<SimpleEvaluationFormProps> = ({ onSa
                 )}
               </div>
 
-              <div className="w-full sm:w-auto flex-1 flex flex-col gap-2">
+              <div className="w-full sm:w-auto flex-1 flex flex-col items-center justify-center gap-2 pt-1 sm:pt-0">
                 <button
                   type="submit"
                   disabled={!pendingEvaluationInfo.isComplete || isSaving}
-                  className="w-full py-3.5 px-6 rounded-xl bg-[#5969E6] hover:bg-[#4856c4] text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-auto py-2.5 sm:py-3 px-6 sm:px-8 rounded-xl bg-[#5969E6] hover:bg-[#4856c4] text-white font-black text-xs sm:text-sm uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4 shrink-0" />
                   <span>{isSaving ? 'Enviando...' : 'Enviar Evaluación'}</span>
                 </button>
-                <div className="text-center text-[10px] text-slate-400 font-medium">
+                <div className="text-center text-[10px] sm:text-[11px] text-slate-400 font-medium max-w-xs">
                   Se registrará con fecha, lote y códigos de muestra en Calidad.
                 </div>
               </div>
