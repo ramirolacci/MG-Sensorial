@@ -114,6 +114,68 @@ A través de un flujo estructurado de auditoría en cuatro dimensiones organolé
 
 ---
 
+## 🚀 Instalación y Puesta en Marcha
+
+Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local.
+
+### 1. Requisitos Previos
+
+- **Node.js**: v18.0 o superior (recomendado LTS)
+- **Gestor de paquetes**: `npm` o `pnpm`
+- **Proyecto Supabase**: Para la persistencia de datos en PostgreSQL en tiempo real.
+
+### 2. Clonar el Repositorio
+
+```bash
+git clone https://github.com/tu-usuario/mg-sensorial.git
+cd mg-sensorial
+```
+
+### 3. Instalar Dependencias
+
+```bash
+# Con npm
+npm install
+
+# O con pnpm
+pnpm install
+```
+
+### 4. Configurar Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto tomando como referencia las credenciales de tu proyecto de Supabase:
+
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-clave-anon-o-publishable-key
+```
+
+> [!TIP]
+> Si estás configurando una base de datos nueva en Supabase, ejecuta el script [`supabase_schema.sql`](supabase_schema.sql) en el **SQL Editor** del panel de Supabase para inicializar la tabla oficial `sensorial_evaluations_v2` con sus índices y restricciones.
+
+### 5. Iniciar Servidor de Desarrollo
+
+```bash
+# Con npm
+npm run dev
+
+# O con pnpm
+pnpm dev
+```
+
+La aplicación quedará disponible en el navegador (por defecto en `http://localhost:5173`).
+
+### 6. Scripts Disponibles
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Inicia el servidor de desarrollo local con Vite (HMR) |
+| `npm run build` | Compila TypeScript y genera el bundle optimizado para producción en `/dist` |
+| `npm run preview` | Previsualiza localmente el build de producción |
+| `npm run lint` | Ejecuta el linter (Oxlint) para análisis estático del código |
+
+---
+
 <div align="center">
   <sub>Desarrollado para <b>Mi Gusto — Calidad & Desarrollo</b> • Protocolo Oficial de Calidad Sensorial INF-D003</sub>
 </div>
